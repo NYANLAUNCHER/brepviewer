@@ -6,21 +6,21 @@ OPTFLAGS := -O0 -ggdb
 LIBS := glfw cglm GL m pthread Xrandr Xi dl
 CFLAGS := -Ilib/include -Llib $(addprefix -l,$(LIBS)) $(OPTFLAGS)
 
-SRCS := $(wildcard src/*.c)
-OBJS := $(SRCS:src/%.c=$(BUILD_DIR)/%.o) $(wildcard lib/*.o)
-DEPS := $(OBJS:.o=.d)
+SRCS := src/%.c
+OBJS := $(BUILD_DIR)/$(notdir $(SRCS:.c=.o)) lib/%.o
+# the generated dependency rules from the compiler
+DEPS := $(BUILD_DIR)/$(notdir $(SRCS:.c=.d))
 
 .PHONY: run
 run: $(TARGET_EXEC)
-	./$(TARGET_EXEC)
+	$(TARGET_EXEC)
 
 $(TARGET_EXEC): $(OBJS)
 	$(CC) $(CFLAGS) $^ -o $@
 
-$(BUILD_DIR)/%.o: src/%.c
-	$(CC) $(CFLAGS) -MP -MMD -c $< -o $@
-
--include $(DEPS)
+$(BUILD_DIR)/%.o $(DEPS): $(SRCS)
+	$(CC) -MP -MMD -c $^
 
 lib/%.o:
 	$(MAKE) -C lib/
+

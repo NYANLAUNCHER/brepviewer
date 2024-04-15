@@ -6,3 +6,4 @@ Simple [BREP](https://dev.opencascade.org/doc/overview/html/specification__brep_
 - [glfw](https://github.com/glfw/glfw)
 - [cglm](https://github.com/recp/cglm)
 - [cimgui](https://github.com/cimgui/cimgui)
+- [scons](https://scons.org/)

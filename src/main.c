@@ -29,9 +29,9 @@ int main(int argc, char** argv) {
 
     // Data: {{{
     float vertices[] = {
-    }
+    };
     float indices[] = {
-    }
+    };
     unsigned int VBO, VAO, EBO;
     // }}}
 
