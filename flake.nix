@@ -33,7 +33,7 @@
     devShells.${system}.default = pkgs.mkShell {
       inherit buildInputs;
       nativeBuildInputs = with pkgs; [
-        glxinfo
+        #glxinfo
         lldb
         gdb
         renderdoc

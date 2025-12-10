@@ -3,8 +3,7 @@
 .SUFFIXES: .c .cpp .o .d
 ##### Includes: ##########
 include ./config.mk
-include ./lib/include.mk
-#include ./tools/make/help.mk
+#include ./lib/include.mk
 ##### Prerequisites: #####
 SRCDIR := ./src
 RESDIR := ./res
@@ -15,7 +14,6 @@ DEPS := $(CXXSRCS:$(SRCDIR)/%.cpp=$(OBJDIR)/%.d)
 TARGET := $(build)/bin/$(pname)
 OBJDIR := $(build)/.obj_tree
 CXXOBJS := $(CXXSRCS:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
-RESDEST := $(build)/share/$(pname)
 RESOURCES := $(addprefix $(RESDEST)/,$(shell realpath --relative-to=$(RESDIR) $(shell find $(RESDIR) -type f)))
 SUBMAKE := $(shell dirname $(shell find . -name "submake.mk") 2>/dev/null || true)
 ##### Flags: #############

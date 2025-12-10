@@ -7,7 +7,7 @@
 #include <chrono>
 #include <thread>
 // local headers
-#include "sys_paths.h"
+#include "_generated/sys_paths.h"
 #include "shader.hpp"
 #include "texture.hpp"
 #include "util.hpp"
