@@ -1,3 +1,4 @@
 .ccls*
-.devenv
+**/Session.vim
 build/
+.devenv
