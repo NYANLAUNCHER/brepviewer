@@ -1,5 +1,4 @@
 #include "shader.hpp"
 
-Shader::Shader() {
-  
+Shader::Shader(std::string base_path, std::string base_name) {
 }
