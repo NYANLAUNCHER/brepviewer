@@ -1,4 +1,5 @@
-.ccls*
-**/Session.vim
 build/
+.ccls-cache/
+.ccls
 .devenv
+**/Session.vim
