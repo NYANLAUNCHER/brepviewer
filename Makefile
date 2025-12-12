@@ -39,7 +39,7 @@ build: $(SUBMAKE) # $(SUBMAKE) is always the first target to run
 	@$(MAKE) $(TARGET)
 
 develop: .dev-profile
-	echo $(realpath $</etc/profile.d/nix.sh)
+	. $(realpath $<)
 
 .PHONY: run
 run: build
@@ -55,7 +55,6 @@ debug: build
 clean:
 	@echo -e '\033[0;32mCleaning build artifacts\033[0m'
 	rm -rf $(build)/* $(build)/.*
-	rm .ccls
 
 .PHONY: install
 install: # sync $(build) and $(out)
@@ -65,11 +64,8 @@ endif
 	rsync -a --delete $(build)/ $(out)
 
 #### Tools: ####
-.devenv: flake.nix
+.dev-profile: flake.nix flake.lock
 	nix print-dev-env > $@
-
-.dev-profile: flake.nix
-	nix develop --profile .dev-profile
 
 .ccls: 
 	@echo -e '\033[0;32mRunning rule: \033[0;34m$@\033[0m'

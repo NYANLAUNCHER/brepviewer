@@ -1,5 +1,5 @@
 {
-  description = "An OpenGL project in C for NixOS";
+  description = "An incomplete BREP (Boundary REPresentation) viewer written in CPP using OpenGL.";
 
   inputs.nixpkgs.url = "nixpkgs/nixos-unstable";
 
@@ -7,7 +7,8 @@
   let
     system = "x86_64-linux";
     pkgs = import nixpkgs { inherit system; };
-    pname = "my-opengl-app";
+    ##########################################
+    pname = "brep";
     version = "0.1.0";
     nativeBuildInputs = with pkgs; [ # build-time dependencies
         pkg-config autoconf automake gcc
@@ -19,6 +20,7 @@
       glfw
       glm
     ];
+    ##########################################
   in {
     defaultPackage.${system} = pkgs.stdenv.mkDerivation {
       inherit pname version buildInputs nativeBuildInputs;
