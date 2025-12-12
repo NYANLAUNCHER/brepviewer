@@ -1,9 +1,6 @@
 # brepviewer
 An incomplete BREP (Boundary REPresentation) viewer written in CPP using OpenGL.
 
-# stupid stuff
-[  ] hi there
-[  ] hi there
-[  ] hi there
-[  ] hi there
-[  ] hi there
+# Feature Roadmap
+- [] Load BREP models
+- [] Render BREP models
