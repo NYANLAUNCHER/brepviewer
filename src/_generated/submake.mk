@@ -8,5 +8,5 @@ $(error Variable $$(RESDEST) must be defined)
 endif
 	@echo "#pragma once" > $@
 	@echo "#define RESOURCE_DIR \"$(RESDEST)\"" >> $@
-	@echo "#define SHADER_DIR RESOURCE_DIR\"/textures\"" >> $@
+	@echo "#define SHADER_DIR RESOURCE_DIR\"/shaders\"" >> $@
 	@echo "#define TEXTURE_DIR RESOURCE_DIR\"/textures\"" >> $@

@@ -9,4 +9,5 @@ endif
 export TOP := $(CURDIR)
 export RESDEST := $(build)/share/$(pname)
 # default flags
-export CXXFLAGS = -g -ggdb -DDEBUG
+export CXXFLAGS = -std=c++20 -Wall
+export CXXFLAGS += -g -ggdb -DDEBUG

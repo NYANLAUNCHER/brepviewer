@@ -34,12 +34,12 @@ LDFLAGS += -lm -lGL -lGLEW -lglfw -lglm
 .DEFAULT_GOAL :=
 .PHONY: build
 build: $(SUBMAKE) # $(SUBMAKE) is always the first target to run
-	@$(MAKE) .ccls
+	@$(MAKE) -i .ccls
 	@$(MAKE) -i $(RESOURCES)
 	@$(MAKE) $(TARGET)
 
-develop: .devenv
-	. $(realpath $<)
+develop: .dev-profile
+	echo $(realpath $</etc/profile.d/nix.sh)
 
 .PHONY: run
 run: build
@@ -67,6 +67,9 @@ endif
 #### Tools: ####
 .devenv: flake.nix
 	nix print-dev-env > $@
+
+.dev-profile: flake.nix
+	nix develop --profile .dev-profile
 
 .ccls: 
 	@echo -e '\033[0;32mRunning rule: \033[0;34m$@\033[0m'

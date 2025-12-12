@@ -211,11 +211,6 @@ int main() {
         // Draw
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
-        //model = glm::translate(glm::mat4(1.0f), glm::vec3(0.005f, 0.0f, 0.0f));
-        //glUniformMatrix4fv(myShaderProg.getUniform("model"), 1, GL_FALSE, glm::value_ptr(model));
-        //glUniformMatrix4fv(myShaderProg.getUniform("view"), 1, GL_FALSE, glm::value_ptr(view));
-        //glUniformMatrix4fv(myShaderProg.getUniform("proj"), 1, GL_FALSE, glm::value_ptr(proj));
-        //glDrawArrays(GL_TRIANGLES, 0, 36);
 
         // Print dynamic info
         accDelta += deltaTime;
