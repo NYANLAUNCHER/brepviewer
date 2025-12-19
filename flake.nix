@@ -43,7 +43,6 @@
       ] ++ nativeBuildInputs;
       shellHook = ''
         export pname=${pname}
-        export build="$(realpath ./build)"
         export out=""
       '';
     };
