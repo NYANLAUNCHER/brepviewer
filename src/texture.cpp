@@ -4,6 +4,7 @@
 #include "stb_image.h"
 #include "util.hpp"
 
+// TODO: load texture into memory without binding it
 Texture::Texture(GLenum target, std::string filepath, bool flipY) {
     glGenTextures(1, &m_ID);
     m_target = target;
