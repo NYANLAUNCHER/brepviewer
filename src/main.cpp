@@ -145,8 +145,6 @@ int main() {
     // Initialize uniforms
     sp_lightObj.use();
     sp_lightObj.setVec3f("lightColor",  {1.0f, 1.0f, 1.0f});
-    sp_lightObj.setInt("texture0", 0);
-    auto tex_hitler = Texture(GL_TEXTURE_2D, TEXTURE_DIR"/hitler.png", false);
 
     // Create transforms
     glm::mat4 model = glm::scale(glm::mat4(1.0f), glm::vec3(0.2f));
