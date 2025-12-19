@@ -1,9 +1,10 @@
 #include "shader.hpp"
+#include "util.hpp"
 #include <fstream>
 #include <sstream>
 #include <iostream>
 #include <unordered_map>
-#include "util.hpp"
+#include <glm/gtc/type_ptr.hpp>
 
 Shader::Shader(std::string base_path, std::string base_name) {
     if (base_path.back() != '/') 
@@ -102,6 +103,10 @@ void Shader::setFloat(std::string name, float value) {
     glUniform1f(getUniform(name.c_str()), value);
 }
 
-void Shader::setMat4fv(std::string name, const GLfloat *value) {
-    glUniformMatrix4fv(getUniform(name.c_str()), 1, GL_FALSE, value);
+void Shader::setVec3f(std::string name, glm::vec3 value) {
+    glUniform3fv(getUniform(name.c_str()), 1, glm::value_ptr(value));
+}
+
+void Shader::setMat4f(std::string name, glm::mat4& value) {
+    glUniformMatrix4fv(getUniform(name.c_str()), 1, GL_FALSE, &value[0][0]);
 }

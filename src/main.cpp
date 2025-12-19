@@ -135,26 +135,26 @@ int main() {
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
-    // Load textures
-    auto tex_container = Texture(GL_TEXTURE_2D, TEXTURE_DIR"/container.jpg", true);
-    auto tex_awesomeface = Texture(GL_TEXTURE_2D, TEXTURE_DIR"/awesomeface.png", true);
-
     // Create shader program
-    auto myShaderProg = Shader(SHADER_DIR"/textures", "basic");
-    //auto myShaderProg = Shader(SHADER_DIR"/lighting", "basic");
-    myShaderProg.use();
+    auto sp_cube = Shader(SHADER_DIR, "basic");
     // Initialize uniforms
-    myShaderProg.setInt("texture0", 0);
-    myShaderProg.setInt("texture1", 1);
+    sp_cube.use();
+    sp_cube.setVec3f("translate", glm::vec3(1.0f));
+    // Cube of Light!
+    auto sp_lightObj = Shader(SHADER_DIR"/lighting", "basic");
+    // Initialize uniforms
+    sp_lightObj.use();
+    sp_lightObj.setVec3f("lightColor",  {1.0f, 1.0f, 1.0f});
 
     // Create transforms
-    glm::mat4 model = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-    auto cameraPos   = glm::vec3(0.0f, 0.0f, 3.0f);
+    glm::mat4 model = glm::scale(glm::mat4(1.0f), glm::vec3(0.2f));
+    model = glm::translate(model, {1.2f, 1.0f, 2.0f});
+    auto cameraPos   = glm::vec3(-6.0f, 0.0f, 0.0f);
     auto cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
     auto cameraUp    = glm::vec3(0.0f, 1.0f, 0.0f);
     glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
     glm::mat4 proj = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
-    auto direction = glm::vec3(0.0f, -1.0f, 0.0f);
+    auto direction = cameraFront;
 
     double deltaTime=0;
     double accDelta=0;// accumulated delta for average frame rate
@@ -164,17 +164,13 @@ int main() {
     while (!glfwWindowShouldClose(window)) {
         double currTime = glfwGetTime();
         deltaTime = currTime - lastTime;
-        float greenValue = (sin(currTime) / 2.0f) + 0.5f;
         // Setup
         glEnable(GL_DEPTH_TEST);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glClearColor(0.2f, greenValue, 0.3f, 1.0f);
-        myShaderProg.use();
-        tex_container.activate(GL_TEXTURE0);
-        tex_awesomeface.activate(GL_TEXTURE1);
+        glClearColor(0.2f, 0.4f, 0.3f, 1.0f);
         // Handle Mouse Movement {{{
         static double c_xpos=WINDOW_CENTER_X, c_ypos=WINDOW_CENTER_Y;
-        static float pitch=0.0f, yaw=-90.0f;
+        static float pitch=0.0f, yaw=-0.0f;
         float lastX = c_xpos;
         float lastY = c_ypos;
         glfwGetCursorPos(window, &c_xpos, &c_ypos);
@@ -208,13 +204,24 @@ int main() {
         if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
             cameraPos -= cameraSpeed * cameraUp;
         //}}}
-        // Send MVP to shader pipeline
         view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-        glUniformMatrix4fv(myShaderProg.getUniform("model"), 1, GL_FALSE, glm::value_ptr(model));
-        glUniformMatrix4fv(myShaderProg.getUniform("view"), 1, GL_FALSE, glm::value_ptr(view));
-        glUniformMatrix4fv(myShaderProg.getUniform("proj"), 1, GL_FALSE, glm::value_ptr(proj));
 
-        // Draw
+        // Draw light cube
+        sp_lightObj.use();
+        // Send MVP matrix to shader pipeline
+        sp_lightObj.setMat4f("model", model);
+        sp_lightObj.setMat4f("view", view);
+        sp_lightObj.setMat4f("proj", proj);
+        glBindVertexArray(VAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        // Draw light cube
+        sp_cube.use();
+        // Send MVP matrix to shader pipeline
+        static glm::mat4 model_mat = glm::translate(model, glm::vec3(0.0f));
+        sp_cube.setMat4f("model", model_mat);
+        sp_cube.setMat4f("view", view);
+        sp_cube.setMat4f("proj", proj);
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
@@ -225,6 +232,12 @@ int main() {
             std::cout << "Delta Time: " << accDelta/d << "\n";
             std::cout << "Frame Rate: " << (int)(d/accDelta) << "\n";
             std::cout << "currTime: " << currTime << "\n";
+            std::cout << "pitch: " << pitch << "\n";
+            std::cout << "yaw: " << yaw << "\n";
+            std::cout << "cameraPos:" <<
+                " X" << cameraPos.x <<
+                " Y" << cameraPos.y <<
+                " Z" << cameraPos.z << "\n";
             std::cout.flush();
             accDelta=0;
             d=0;
