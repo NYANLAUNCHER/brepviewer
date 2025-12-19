@@ -140,8 +140,8 @@ int main() {
     auto tex_awesomeface = Texture(GL_TEXTURE_2D, TEXTURE_DIR"/awesomeface.png", true);
 
     // Create shader program
-    //auto myShaderProg = Shader(SHADER_DIR"/textures", "basic");
-    auto myShaderProg = Shader(SHADER_DIR"/lighting", "basic");
+    auto myShaderProg = Shader(SHADER_DIR"/textures", "basic");
+    //auto myShaderProg = Shader(SHADER_DIR"/lighting", "basic");
     myShaderProg.use();
     // Initialize uniforms
     myShaderProg.setInt("texture0", 0);

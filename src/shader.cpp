@@ -23,6 +23,8 @@ Shader::Shader(std::string base_path, std::string base_name) {
         fragFile.open(fragPath);
         std::stringstream vertStream, fragStream;
         // read file's buffer contents into streams
+        vertStream << vertFile.rdbuf();
+        fragStream << fragFile.rdbuf();
         // close file handlers
         vertFile.close();
         fragFile.close();
