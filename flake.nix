@@ -8,7 +8,7 @@
     system = "x86_64-linux";
     pkgs = import nixpkgs { inherit system; };
     ##########################################
-    pname = "brep";
+    pname = "brepviewer";
     version = "0.1.0";
     nativeBuildInputs = with pkgs; [ # build-time dependencies
         pkg-config autoconf automake gcc

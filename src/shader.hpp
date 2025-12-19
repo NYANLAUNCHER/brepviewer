@@ -16,4 +16,6 @@ public:
     void setBool(std::string name, bool value);
     void setInt(std::string name, int value);
     void setFloat(std::string name, float value);
+    // transpose is always set to false
+    void setMat4fv(std::string name, const GLfloat *value);
 };

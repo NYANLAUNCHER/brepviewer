@@ -17,36 +17,17 @@
 #define WINDOW_CENTER_Y 600
 typedef unsigned int uint;
 
-static float PITCH=0.0f;
-static float YAW=-90.0f;
-//static float ROLL=0;
-static glm::vec3 direction;
-
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
-}
-
-void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
-    float lastX=WINDOW_CENTER_X, lastY=WINDOW_CENTER_Y;
-    float xoff = xpos - lastX;
-    float yoff = lastY - ypos; // reversed, since y-coordinates range from bottom to top
-    lastX = xpos;
-    lastY = ypos;
-
-    const float sensitivity = 0.0001f;
-    xoff *= sensitivity;
-    yoff *= sensitivity;
-    YAW += xoff;
-    PITCH += yoff;
-    if (PITCH > 89.0f)
-        PITCH = 89.0f;
-    if (PITCH < -89.0f)
-        PITCH = -89.0f;
-
-    direction.x = cos(glm::radians(YAW)) * cos(glm::radians(PITCH));
-    direction.y = sin(glm::radians(PITCH));
-    direction.z = sin(glm::radians(YAW)) * cos(glm::radians(PITCH));
+    switch (key) {
+    case GLFW_KEY_Q:
+        if (action == GLFW_PRESS)
+            glfwSetWindowShouldClose(window, true);
+        break;
+    case GLFW_KEY_ESCAPE:
+        if (action == GLFW_RELEASE)
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        break;
+    }
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
@@ -77,13 +58,15 @@ int main() {
         std::cerr << "Failed to initialize GLEW\n";
         return -1;
     }
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     std::cout << CURSOR_HOME << CLR_AFTER;
     std::cout.flush();
 
-    // Set callbacks
+    // GLFW Input Mode
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    // GLFW Callbacks
     glfwSetKeyCallback(window, key_callback);
-    glfwSetCursorPosCallback(window, mouse_callback);
+    //glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetWindowSizeCallback(window,framebuffer_size_callback);
     glfwSetWindowMaximizeCallback(window, window_maximized_callback);
 
@@ -157,7 +140,8 @@ int main() {
     auto tex_awesomeface = Texture(GL_TEXTURE_2D, TEXTURE_DIR"/awesomeface.png", true);
 
     // Create shader program
-    auto myShaderProg = Shader(SHADER_DIR, "basic");
+    //auto myShaderProg = Shader(SHADER_DIR"/textures", "basic");
+    auto myShaderProg = Shader(SHADER_DIR"/lighting", "basic");
     myShaderProg.use();
     // Initialize uniforms
     myShaderProg.setInt("texture0", 0);
@@ -165,11 +149,12 @@ int main() {
 
     // Create transforms
     glm::mat4 model = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-    glm::vec3 cameraPos   = glm::vec3(0.0f, 0.0f, 3.0f);
-    glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-    glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f, 0.0f);
+    auto cameraPos   = glm::vec3(0.0f, 0.0f, 3.0f);
+    auto cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+    auto cameraUp    = glm::vec3(0.0f, 1.0f, 0.0f);
     glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
     glm::mat4 proj = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+    auto direction = glm::vec3(0.0f, -1.0f, 0.0f);
 
     double deltaTime=0;
     double accDelta=0;// accumulated delta for average frame rate
@@ -187,9 +172,29 @@ int main() {
         myShaderProg.use();
         tex_container.activate(GL_TEXTURE0);
         tex_awesomeface.activate(GL_TEXTURE1);
-        // Register Keys
+        // Handle Mouse Movement {{{
+        static double c_xpos=WINDOW_CENTER_X, c_ypos=WINDOW_CENTER_Y;
+        static float pitch=0.0f, yaw=-90.0f;
+        float lastX = c_xpos;
+        float lastY = c_ypos;
+        glfwGetCursorPos(window, &c_xpos, &c_ypos);
+        float xoff = c_xpos - lastX;
+        float yoff = lastY - c_ypos; // reversed, since glfw's y-coordinates range from bottom to top
+        const float sensitivity = 0.025f;
+        xoff *= sensitivity; yoff *= sensitivity;
+        yaw += xoff;
+        pitch += yoff;
+        if (pitch > 89.0f)
+            pitch = 89.0f;
+        if (pitch < -89.0f)
+            pitch = -89.0f;
+        direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+        direction.y = sin(glm::radians(pitch));
+        direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+        //}}}
+        // Register Keys {{{
         cameraFront = glm::normalize(direction);
-        const float cameraSpeed = 2.5f * deltaTime; // adjust accordingly
+        const float cameraSpeed = 3.0f * deltaTime; // adjust accordingly
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
             cameraPos += cameraSpeed * cameraFront;
         if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -202,8 +207,9 @@ int main() {
             cameraPos += cameraSpeed * cameraUp;
         if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
             cameraPos -= cameraSpeed * cameraUp;
+        //}}}
+        // Send MVP to shader pipeline
         view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-        // Initialize MVP
         glUniformMatrix4fv(myShaderProg.getUniform("model"), 1, GL_FALSE, glm::value_ptr(model));
         glUniformMatrix4fv(myShaderProg.getUniform("view"), 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(myShaderProg.getUniform("proj"), 1, GL_FALSE, glm::value_ptr(proj));

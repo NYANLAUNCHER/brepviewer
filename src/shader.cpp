@@ -6,9 +6,8 @@
 #include "util.hpp"
 
 Shader::Shader(std::string base_path, std::string base_name) {
-    if (base_path.back() != '/') {
+    if (base_path.back() != '/') 
         base_path = base_path + "/";
-    }
     std::string vertPath = base_path + base_name + ".vert";
     std::string fragPath = base_path + base_name + ".frag";
     std::string vertSrc;
@@ -24,17 +23,15 @@ Shader::Shader(std::string base_path, std::string base_name) {
         fragFile.open(fragPath);
         std::stringstream vertStream, fragStream;
         // read file's buffer contents into streams
-        vertStream << vertFile.rdbuf();
-        fragStream << fragFile.rdbuf();
         // close file handlers
         vertFile.close();
         fragFile.close();
         // convert stream into string
         vertSrc = vertStream.str();
         fragSrc = fragStream.str();
-        std::cout << GREEN("Compiling vertex shader: ") << BLUE(vertPath) <<
+        std::cout << GREEN("Compiling vertex shader: ") << BLUE(vertPath) << "\n" <<
                      vertSrc << std::endl;
-        std::cout << GREEN("Compiling fragment shader: ") << BLUE(fragPath) << std::endl <<
+        std::cout << GREEN("Compiling fragment shader: ") << BLUE(fragPath) << "\n" <<
                      fragSrc << std::endl;
     } catch (std::ifstream::failure& e) {
         std::cout << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ: " << e.what() << std::endl;
@@ -101,4 +98,8 @@ void Shader::setInt(std::string name, int value) {
 
 void Shader::setFloat(std::string name, float value) {
     glUniform1f(getUniform(name.c_str()), value);
+}
+
+void Shader::setMat4fv(std::string name, const GLfloat *value) {
+    glUniformMatrix4fv(getUniform(name.c_str()), 1, GL_FALSE, value);
 }
