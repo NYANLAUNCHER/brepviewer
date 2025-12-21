@@ -56,6 +56,10 @@ Shader::Shader(std::string base_path, std::string base_name) {
     checkCompileErrors(m_ID, "PROGRAM");
     glDeleteShader(vertID);
     glDeleteShader(fragID);
+    // Init special uniforms
+    this->model=glm::mat4(1.0f);
+    this->view=glm::mat4(1.0f);
+    this->proj=glm::mat4(1.0f);
 }
 
 void Shader::checkCompileErrors(unsigned int shader_id, std::string type) {
@@ -76,7 +80,7 @@ void Shader::checkCompileErrors(unsigned int shader_id, std::string type) {
     }
 }
 
-void Shader::use() const {
+void Shader::activate() const {
     glUseProgram(m_ID);
 }
 
@@ -88,7 +92,7 @@ GLint Shader::getUniform(std::string name) {
         m_knownUniforms[name] = glGetUniformLocation(m_ID, name.c_str());
         return m_knownUniforms[name];
     }
-    return -1;// default
+    return -1;//fallback
 }
 
 void Shader::setBool(std::string name, bool value) {

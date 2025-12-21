@@ -10,9 +10,15 @@ private:
     std::unordered_map<std::string, GLint> m_knownUniforms;
     void checkCompileErrors(unsigned int shader_id, std::string type);
 public:
+    // special uniforms
+    glm::mat4 model;// -> world space
+    glm::mat4 view;// -> view/camera space
+    glm::mat4 proj;// -> clip space
     ///@param base_name The name of the shader without file extention
     Shader(std::string base_path, std::string base_name);
-    void use() const;
+    void activate() const;
+    // update uniforms
+    void update() const;
     GLint getUniform(std::string name);
     void setBool(std::string name, bool value);
     void setInt(std::string name, int value);

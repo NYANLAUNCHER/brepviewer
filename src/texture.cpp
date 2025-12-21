@@ -8,6 +8,7 @@
 Texture::Texture(GLenum target, std::string filepath, bool flipY) {
     glGenTextures(1, &m_ID);
     m_target = target;
+    // bind texture to target so OpenGL knows where to apply texture parameters
     glBindTexture(m_target, m_ID);
     // texture parameters
     glTexParameteri(m_target, GL_TEXTURE_WRAP_S, GL_REPEAT);
