@@ -15,6 +15,15 @@
 #define FOV_INIT 45.0f
 typedef unsigned int uint;
 
+// Cardinal directions in world space
+//                                    X      Y      Z
+static const glm::vec3 VEC_FWD   = { 0.0f,  1.0f,  0.0f };
+static const glm::vec3 VEC_BACK  = { 0.0f, -1.0f,  0.0f };
+static const glm::vec3 VEC_RIGHT = { 1.0f,  0.0f,  0.0f };
+static const glm::vec3 VEC_LEFT  = {-1.0f,  0.0f,  0.0f };
+static const glm::vec3 VEC_UP    = { 0.0f,  0.0f,  1.0f };
+static const glm::vec3 VEC_DOWN  = { 0.0f,  0.0f, -1.0f };
+
 static uint gWINDOW_WIDTH=1600;
 static uint gWINDOW_HEIGHT=1200;
 static float gWINDOW_CENTER_X=(gWINDOW_WIDTH*0.5);
@@ -47,16 +56,17 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, gWINDOW_WIDTH, gWINDOW_HEIGHT);
 }
 
-void window_maximized_callback(GLFWwindow* window, int maximzied) {
+void window_maximized_callback(GLFWwindow* window, int maximzied) {//{{{
+    // Hides title bar when maximzied
     if (maximzied) {
         glfwSetWindowAttrib(window, GLFW_DECORATED, GLFW_FALSE);
     } else {
         glfwSetWindowAttrib(window, GLFW_DECORATED, GLFW_TRUE);
     }
-}
+}//}}}
 
 int main() {
-    // Window & Context Setup:
+    // Window & Context Setup: {{{
     if (!glfwInit()) {
         std::cerr << "Failed to initialize GLFW\n";
         return -1;
@@ -73,6 +83,7 @@ int main() {
     }
     std::cout << CURSOR_HOME << CLR_AFTER;
     std::cout.flush();
+    //}}}
 
     // GLFW Callbacks
     glfwSetKeyCallback(window, key_callback);
@@ -80,12 +91,12 @@ int main() {
     glfwSetWindowSizeCallback(window,framebuffer_size_callback);
     glfwSetWindowMaximizeCallback(window, window_maximized_callback);
 
-    // Debug info
+    // Print Debug info
     std::cout << GREEN("SHADER_DIR = ") << BLUE(SHADER_DIR) << std::endl;
     std::cout << GREEN("TEXTURE_DIR = ") << BLUE(TEXTURE_DIR) << std::endl;
 
     float vertices[] = {
-       //positions          //texture coords  //vertex normals
+       //positions           //texture coords  //vertex normals
        // Face 1
        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,       0.0f,  0.0f, -1.0f,
         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,       0.0f,  0.0f, -1.0f,
@@ -165,12 +176,13 @@ int main() {
     // Initialize transforms
     glm::mat4 model = glm::scale(glm::mat4(1.0f), glm::vec3(0.2f));
     model = glm::translate(model, {1.2f, 1.0f, 2.0f});
-    auto cameraPos   = glm::vec3(-6.0f, 0.0f, 0.0f);
-    auto cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-    auto cameraUp    = glm::vec3(0.0f, 1.0f, 0.0f);
-    glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+    //auto cameraPos   = glm::vec3(-6.0f, 0.0f, 0.0f);
+    //auto cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+    //auto cameraUp    = glm::vec3(0.0f, 1.0f, 0.0f);
+    //glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+    //auto direction = cameraFront;
+    glm::mat4 view = glm::mat4(1.0f);
     glm::mat4 proj = glm::perspective(glm::radians(FOV_INIT), 1.0f, 0.1f, 100.0f);
-    auto direction = cameraFront;
     // Create Camera
     Camera camera;
 
@@ -205,9 +217,11 @@ int main() {
                 pitch = 89.0f;
             if (pitch < -89.0f)
                 pitch = -89.0f;
-            direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-            direction.y = sin(glm::radians(pitch));
-            direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+            camera.look({
+              cos(glm::radians(yaw)) * cos(glm::radians(pitch)),
+              sin(glm::radians(pitch)),
+              sin(glm::radians(yaw)) * cos(glm::radians(pitch))
+            });
         }
         switch ((int)gScrollY) {
         case 1:
@@ -223,27 +237,26 @@ int main() {
             fov=FOV_INIT;
         //}}}
         // Handle Keyboard Events {{{
-        cameraFront = glm::normalize(direction);
         const float cameraSpeed = 3.0f * deltaTime; // adjust accordingly
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-            cameraPos += cameraSpeed * cameraFront;
+            camera.move(VEC_FWD*cameraSpeed);
         if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-            cameraPos -= cameraSpeed * cameraFront;
+            camera.move(VEC_BACK*cameraSpeed);
         if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-            cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+            camera.move(VEC_LEFT*cameraSpeed);
         if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-            cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+            camera.move(VEC_RIGHT*cameraSpeed);
         if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-            cameraPos += cameraSpeed * cameraUp;
+            camera.move(VEC_UP*cameraSpeed);
         if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-            cameraPos -= cameraSpeed * cameraUp;
+            camera.move(VEC_DOWN*cameraSpeed);
         //}}}
         if (fov > 120.0f)
             fov=120.0f;
         if (fov < 10.0f)
             fov=10.0f;
         proj = glm::perspective(glm::radians(fov), gWINDOW_ASPECT, 0.1f, 100.0f);
-        view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+        camera.update(view);// write to view matrix
 
         // Draw light source
         shdr_lightSrc.activate();
@@ -276,9 +289,9 @@ int main() {
             std::cout << "pitch: " << pitch << "\n";
             std::cout << "yaw: " << yaw << "\n";
             std::cout << "cameraPos:" <<
-                " X" << cameraPos.x <<
-                " Y" << cameraPos.y <<
-                " Z" << cameraPos.z << "\n";
+                " X" << camera.getPos().x <<
+                " Y" << camera.getPos().y <<
+                " Z" << camera.getPos().z << "\n";
             std::cout << "c_xpos: " << c_xpos << "\n";
             std::cout << "c_ypos: " << c_ypos << "\n";
             std::cout.flush();

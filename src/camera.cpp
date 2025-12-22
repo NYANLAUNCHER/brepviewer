@@ -4,10 +4,6 @@
 Camera::Camera() {
 }
 
-void Camera::updateView(GLint uniform) {
-    glUniformMatrix4fv(uniform, 1, GL_FALSE, &m_view[0][0]);
-}
-
 void Camera::setFov(double radians) {
     m_fov=std::fabs(radians);
 }
@@ -28,10 +24,4 @@ void Camera::lookAt(glm::vec3 target) {
     m_direction=glm::normalize(target-m_position);
     // Recalculate view matrix
     m_view=glm::lookAt(m_position, target, m_up);
-}
-
-void Camera::pitch(double radians) {
-}
-
-void Camera::yaw(double radians) {
 }
