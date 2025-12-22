@@ -224,8 +224,8 @@ int main() {
         sp_cube.setMat4f("model", model_mat);
         sp_cube.setMat4f("view", view);
         sp_cube.setMat4f("proj", proj);
-        glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        //glBindVertexArray(VAO);
+        //glDrawArrays(GL_TRIANGLES, 0, 36);
 
         // Print dynamic info
         accDelta += deltaTime;
