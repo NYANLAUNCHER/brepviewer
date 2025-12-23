@@ -5,9 +5,8 @@ layout(location = 2) in vec3 aNormal;
 
 uniform mat4 model;
 uniform mat4 view;
-uniform mat4 proj;
 uniform vec3 translate;
 
 void main() {
-  gl_Position = proj * view * model * vec4(aPos*translate, 1.0);
+  gl_Position = view * model * vec4(aPos*translate, 1.0);
 }

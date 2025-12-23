@@ -41,6 +41,7 @@ inline std::string CURSOR_POS(int line, int column) {
   return ESC"[" + std::to_string(line) + ";" + std::to_string(column) + "H";
 }
 
+#include <glm/glm.hpp>
 namespace util {
     inline std::pair<int, int> getCursorPos() {
         // Request cursor position: ESC[6n
@@ -66,3 +67,17 @@ namespace util {
         return {row, col};
     }
 };
+
+namespace util::coord {
+    struct Spherical {
+        float phi=0;
+        float theta=0;
+    };
+    inline Spherical toSpherical() {
+        Spherical s;
+        return s;
+    }
+    inline glm::vec3 fromSpherical() {
+        return {0,0,0};
+    }
+}

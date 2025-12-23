@@ -12,17 +12,18 @@
 #include "shader.hpp"
 #include "texture.hpp"
 #include "camera.hpp"
+#include "model.hpp"
 #define FOV_INIT 45.0f
 typedef unsigned int uint;
 
 // Cardinal directions in world space
 //                                    X      Y      Z
-static const glm::vec3 VEC_FWD   = { 0.0f,  1.0f,  0.0f };
-static const glm::vec3 VEC_BACK  = { 0.0f, -1.0f,  0.0f };
+static const glm::vec3 VEC_FWD   = { 0.0f,  0.0f,  1.0f };
+static const glm::vec3 VEC_BACK  = { 0.0f,  0.0f, -1.0f };
 static const glm::vec3 VEC_RIGHT = { 1.0f,  0.0f,  0.0f };
 static const glm::vec3 VEC_LEFT  = {-1.0f,  0.0f,  0.0f };
-static const glm::vec3 VEC_UP    = { 0.0f,  0.0f,  1.0f };
-static const glm::vec3 VEC_DOWN  = { 0.0f,  0.0f, -1.0f };
+static const glm::vec3 VEC_UP    = { 0.0f,  1.0f,  1.0f };
+static const glm::vec3 VEC_DOWN  = { 0.0f, -1.0f, -1.0f };
 
 static uint gWINDOW_WIDTH=1600;
 static uint gWINDOW_HEIGHT=1200;
@@ -163,37 +164,29 @@ int main() {
     auto shdr_cube = Shader(SHADER_DIR"/lighting", "object");
     // Initialize uniforms
     shdr_cube.activate();
-    shdr_cube.setVec3f("translate", glm::vec3(0.0f));
+    shdr_cube.setVec3f("translate", glm::vec3(1.0f));
     // Cube of Light!
     auto shdr_lightSrc = Shader(SHADER_DIR"/lighting", "source");
     // Initialize uniforms
     shdr_lightSrc.activate();
     shdr_lightSrc.setVec3f("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
-    shdr_lightSrc.setFloat("scale", 0.5f);
-    //shdr_lightSrc.setVec3f("translate", glm::vec3(0.0f));
 
 
     // Initialize transforms
     glm::mat4 model = glm::scale(glm::mat4(1.0f), glm::vec3(0.2f));
-    model = glm::translate(model, {1.2f, 1.0f, 2.0f});
-    //auto cameraPos   = glm::vec3(-6.0f, 0.0f, 0.0f);
-    //auto cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-    //auto cameraUp    = glm::vec3(0.0f, 1.0f, 0.0f);
-    //glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-    //auto direction = cameraFront;
     glm::mat4 view = glm::mat4(1.0f);
-    glm::mat4 proj = glm::perspective(glm::radians(FOV_INIT), 1.0f, 0.1f, 100.0f);
     // Create Camera
     Camera camera;
+    camera.move({1.0f, 0.0f, 0.0f});
+    camera.lookAt({0.0f, 0.0f, 0.0f});
 
     double deltaTime=0;
     double accDelta=0;// accumulated delta for average frame rate
     double lastTime=0;
     uint d=0;
-    std::pair cpos=util::getCursorPos();
+    std::pair cpos=util::getCursorPos();// for dynamic terminal output
     while (!glfwWindowShouldClose(window)) {
         // Setup
-        static float fov=FOV_INIT;
         double currTime = glfwGetTime();
         deltaTime = currTime - lastTime;
         glEnable(GL_DEPTH_TEST);
@@ -201,7 +194,7 @@ int main() {
         glClearColor(0.2f, 0.4f, 0.3f, 1.0f);
         // Handle Mouse Events {{{
         static double c_xpos=gWINDOW_CENTER_X, c_ypos=gWINDOW_CENTER_Y;
-        static float pitch=0.0f, yaw=-0.0f;
+        static float pitch=0.0f, yaw=0.0f;
         if (glfwGetWindowAttrib(window, GLFW_FOCUSED)) {
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
             float lastX = c_xpos;
@@ -223,6 +216,7 @@ int main() {
               sin(glm::radians(yaw)) * cos(glm::radians(pitch))
             });
         }
+        static float fov=FOV_INIT;
         switch ((int)gScrollY) {
         case 1:
             fov -= 2.0f;
@@ -235,48 +229,45 @@ int main() {
         }
         if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_3) == GLFW_PRESS)
             fov=FOV_INIT;
+        camera.m_fov=fov;
         //}}}
         // Handle Keyboard Events {{{
-        const float cameraSpeed = 3.0f * deltaTime; // adjust accordingly
+        float cameraSpeed = 3.0f * deltaTime; // adjust accordingly
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-            camera.move(VEC_FWD*cameraSpeed);
+            camera.forward(cameraSpeed);
         if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-            camera.move(VEC_BACK*cameraSpeed);
+            camera.forward(-cameraSpeed);
         if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-            camera.move(VEC_LEFT*cameraSpeed);
+            camera.right(cameraSpeed);
         if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-            camera.move(VEC_RIGHT*cameraSpeed);
+            camera.right(-cameraSpeed);
         if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
             camera.move(VEC_UP*cameraSpeed);
         if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-            camera.move(VEC_DOWN*cameraSpeed);
+            camera.move((-VEC_UP)*cameraSpeed);
         //}}}
         if (fov > 120.0f)
             fov=120.0f;
         if (fov < 10.0f)
             fov=10.0f;
-        proj = glm::perspective(glm::radians(fov), gWINDOW_ASPECT, 0.1f, 100.0f);
-        camera.update(view);// write to view matrix
+
+        camera.write(view);// write to view matrix
 
         // Draw light source
         shdr_lightSrc.activate();
         // Send MVP matrix to shader pipeline
         shdr_lightSrc.setMat4f("model", model);
         shdr_lightSrc.setMat4f("view", view);
-        shdr_lightSrc.setMat4f("proj", proj);
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
-        /*
         // Draw cube
         shdr_cube.activate();
         // Send MVP matrix to shader pipeline
         shdr_cube.setMat4f("model", model);
         shdr_cube.setMat4f("view", view);
-        shdr_cube.setMat4f("proj", proj);
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
-        */
 
         // Print dynamic info
         accDelta += deltaTime;
@@ -284,16 +275,20 @@ int main() {
             std::cout << CURSOR_POS(cpos.first, cpos.second) << CLR_AFTER;
             std::cout << "Delta Time: " << accDelta/d << "\n";
             std::cout << "Frame Rate: " << (int)(d/accDelta) << "\n";
-            std::cout << "WINDOW_ASPECT: " << gWINDOW_ASPECT << "\n";
             std::cout << "currTime: " << currTime << "\n";
-            std::cout << "pitch: " << pitch << "\n";
-            std::cout << "yaw: " << yaw << "\n";
-            std::cout << "cameraPos:" <<
+            std::cout << "cursor: (" << c_xpos << ", " << c_ypos << ")\n";
+            std::cout << "camera.getPos():" <<
                 " X" << camera.getPos().x <<
                 " Y" << camera.getPos().y <<
                 " Z" << camera.getPos().z << "\n";
-            std::cout << "c_xpos: " << c_xpos << "\n";
-            std::cout << "c_ypos: " << c_ypos << "\n";
+            std::cout << "camera.getUp():" <<
+                " X" << camera.getUp().x <<
+                " Y" << camera.getUp().y <<
+                " Z" << camera.getUp().z << "\n";
+            std::cout << "camera.getDirection():" <<
+                " X" << camera.getDirection().x <<
+                " Y" << camera.getDirection().y <<
+                " Z" << camera.getDirection().z << "\n";
             std::cout.flush();
             accDelta=0;
             d=0;
@@ -304,6 +299,8 @@ int main() {
         glfwPollEvents();
         lastTime = currTime;
     }
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
     glfwTerminate();
     return 0;
 }
