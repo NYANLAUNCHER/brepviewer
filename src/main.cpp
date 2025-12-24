@@ -162,9 +162,6 @@ int main() {
 
     // Create shader program
     auto shdr_cube = Shader(SHADER_DIR"/lighting", "object");
-    // Initialize uniforms
-    shdr_cube.activate();
-    shdr_cube.setVec3f("translate", glm::vec3(1.0f));
     // Cube of Light!
     auto shdr_lightSrc = Shader(SHADER_DIR"/lighting", "source");
     // Initialize uniforms
@@ -175,6 +172,7 @@ int main() {
     // Initialize transforms
     glm::mat4 model = glm::scale(glm::mat4(1.0f), glm::vec3(0.2f));
     glm::mat4 view = glm::mat4(1.0f);
+    glm::mat4 proj = glm::mat4(1.0f);
     // Create Camera
     Camera camera;
     camera.move({1.0f, 0.0f, 0.0f});
@@ -251,13 +249,15 @@ int main() {
         if (fov < 10.0f)
             fov=10.0f;
 
-        camera.write(view);// write to view matrix
+        // Pass view and proj matrices by reference
+        camera.writeVP(view, proj);
 
         // Draw light source
         shdr_lightSrc.activate();
         // Send MVP matrix to shader pipeline
         shdr_lightSrc.setMat4f("model", model);
         shdr_lightSrc.setMat4f("view", view);
+        shdr_lightSrc.setMat4f("proj", proj);
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
@@ -266,6 +266,7 @@ int main() {
         // Send MVP matrix to shader pipeline
         shdr_cube.setMat4f("model", model);
         shdr_cube.setMat4f("view", view);
+        shdr_cube.setMat4f("proj", proj);
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
@@ -277,6 +278,11 @@ int main() {
             std::cout << "Frame Rate: " << (int)(d/accDelta) << "\n";
             std::cout << "currTime: " << currTime << "\n";
             std::cout << "cursor: (" << c_xpos << ", " << c_ypos << ")\n";
+            static const glm::vec4 f = camera.getView()*glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+            std::cout << "Camera_Coord: X1 Y1 Z1 ->" <<
+                " X" << f.x <<
+                " Y" << f.y <<
+                " Z" << f.z << std::endl;
             std::cout << "camera.getPos():" <<
                 " X" << camera.getPos().x <<
                 " Y" << camera.getPos().y <<
