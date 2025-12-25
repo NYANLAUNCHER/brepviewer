@@ -3,6 +3,7 @@
 #include <utility>
 #include <string>
 #include <unistd.h>
+#include <cmath>
 #include <termios.h>
 // Esc Sequences:
 #define ESC "\033"
@@ -70,14 +71,28 @@ namespace util {
 
 namespace util::coord {
     struct Spherical {
-        float phi=0;
-        float theta=0;
+        double r=0;
+        double theta=0;
+        double phi=0;
+        // the nothing constructor
+        Spherical();
+        Spherical(double r, double theta, double phi): r(r), theta(theta), phi(phi) {}
+        inline glm::vec3 toCartesian() {
+            return glm::vec3(
+                r*(sin(phi)*cos(theta)),
+                r*(sin(phi)*sin(theta)),
+                r*cos(phi)
+            );
+        };
     };
-    inline Spherical toSpherical() {
-        Spherical s;
-        return s;
-    }
-    inline glm::vec3 fromSpherical() {
-        return {0,0,0};
+    // Cartesian to spherical coords
+    inline Spherical toSpherical(glm::vec3 cartesian) {
+        auto& cart=cartesian;// I aint spellin allat
+        double r=sqrt((pow(cart.x, 2), pow(cart.y, 2), pow(cart.z, 2)));
+        return Spherical( // r, theta, phi
+            r,
+            acos(cart.z/r),
+            atan2(cart.y, cart.x)
+        );
     }
 }

@@ -3,6 +3,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/io.hpp>
 #include <iostream>
 #include <chrono>
 #include <thread>
@@ -15,15 +17,6 @@
 #include "model.hpp"
 #define FOV_INIT 45.0f
 typedef unsigned int uint;
-
-// Cardinal directions in world space
-//                                    X      Y      Z
-static const glm::vec3 VEC_FWD   = { 0.0f,  0.0f,  1.0f };
-static const glm::vec3 VEC_BACK  = { 0.0f,  0.0f, -1.0f };
-static const glm::vec3 VEC_RIGHT = { 1.0f,  0.0f,  0.0f };
-static const glm::vec3 VEC_LEFT  = {-1.0f,  0.0f,  0.0f };
-static const glm::vec3 VEC_UP    = { 0.0f,  1.0f,  1.0f };
-static const glm::vec3 VEC_DOWN  = { 0.0f, -1.0f, -1.0f };
 
 static uint gWINDOW_WIDTH=1600;
 static uint gWINDOW_HEIGHT=1200;
@@ -175,7 +168,7 @@ int main() {
     glm::mat4 proj = glm::mat4(1.0f);
     // Create Camera
     Camera camera;
-    camera.move({1.0f, 0.0f, 0.0f});
+    camera.moveTo({0.0f, 5.0f, 0.0f});
     camera.lookAt({0.0f, 0.0f, 0.0f});
 
     double deltaTime=0;
@@ -210,8 +203,8 @@ int main() {
                 pitch = -89.0f;
             camera.look({
               cos(glm::radians(yaw)) * cos(glm::radians(pitch)),
-              sin(glm::radians(pitch)),
-              sin(glm::radians(yaw)) * cos(glm::radians(pitch))
+              -(sin(glm::radians(yaw)) * cos(glm::radians(pitch))),
+              sin(glm::radians(pitch))
             });
         }
         static float fov=FOV_INIT;
@@ -227,30 +220,37 @@ int main() {
         }
         if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_3) == GLFW_PRESS)
             fov=FOV_INIT;
-        camera.m_fov=fov;
-        //}}}
-        // Handle Keyboard Events {{{
-        float cameraSpeed = 3.0f * deltaTime; // adjust accordingly
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-            camera.forward(cameraSpeed);
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-            camera.forward(-cameraSpeed);
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-            camera.right(cameraSpeed);
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-            camera.right(-cameraSpeed);
-        if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-            camera.move(VEC_UP*cameraSpeed);
-        if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-            camera.move((-VEC_UP)*cameraSpeed);
-        //}}}
         if (fov > 120.0f)
             fov=120.0f;
         if (fov < 10.0f)
             fov=10.0f;
+        camera.m_fov=fov;
+        //}}}
+        // Handle Keyboard Events {{{
+        float cameraSpeed = 3.0f * deltaTime; // adjust accordingly
+        // Move Forward
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+            camera.forward(cameraSpeed);
+        // Move Backward
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+            camera.forward(-cameraSpeed);
+        // Move Right
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+            camera.right(cameraSpeed);
+        // Move Left
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+            camera.right(-cameraSpeed);
+        //Move up
+        if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+            camera.move(glm::vec3(0.0f, 0.0f, 1.0f)*cameraSpeed);
+        // Move Down
+        if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+            camera.move(glm::vec3(0.0f, 0.0f, -1.0f)*cameraSpeed);
+        //}}}
 
         // Pass view and proj matrices by reference
-        camera.writeVP(view, proj);
+        camera.writeView(view);
+        camera.writeProj(proj);
 
         // Draw light source
         shdr_lightSrc.activate();
@@ -282,7 +282,8 @@ int main() {
             std::cout << "Camera_Coord: X1 Y1 Z1 ->" <<
                 " X" << f.x <<
                 " Y" << f.y <<
-                " Z" << f.z << std::endl;
+                " Z" << f.z << "\n";
+            std::cout << camera.getView() << "\n";
             std::cout << "camera.getPos():" <<
                 " X" << camera.getPos().x <<
                 " Y" << camera.getPos().y <<
