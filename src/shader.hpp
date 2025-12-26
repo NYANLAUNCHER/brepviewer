@@ -17,6 +17,7 @@ public:
     ///@param base_name The name of the shader without file extention
     Shader(std::string base_path, std::string base_name);
     void activate() const;
+    inline GLint getID() const {return m_ID;}
     // update uniforms
     void update() const;
     GLint getUniform(std::string name);

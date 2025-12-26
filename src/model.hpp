@@ -1,6 +1,32 @@
 #pragma once
 #include "shader.hpp"
 #include "texture.hpp"
+// Assimp
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
+struct Vertex {
+    glm::vec3 position;
+    glm::vec2 texCoords;
+    glm::vec3 normal;
+};
+
+class Mesh {
+private:
+    unsigned int VAO, VBO, EBO;
+    aiMesh* mesh;
+    std::vector<Vertex> verts;
+    std::vector<unsigned int> indices;
+public:
+    Mesh(const std::string& pFile);
+    ~Mesh() {
+        glDeleteVertexArrays(1, &VAO);
+        glDeleteBuffers(1, &VBO);
+        glDeleteBuffers(1, &EBO);
+    }
+    void draw();
+};
 
 // Defines a single vertex attribute
 // NOTE: does not contain an index specifier

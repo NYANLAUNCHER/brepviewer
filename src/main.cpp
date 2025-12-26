@@ -1,11 +1,14 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+// GLM
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/io.hpp>
+// STD
 #include <iostream>
+#include <vector>
 #include <chrono>
 #include <thread>
 // local headers
@@ -153,14 +156,12 @@ int main() {
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(5 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
-    // Create shader program
+    // Create shader programs
     auto shdr_cube = Shader(SHADER_DIR"/lighting", "object");
-    // Cube of Light!
     auto shdr_lightSrc = Shader(SHADER_DIR"/lighting", "source");
     // Initialize uniforms
     shdr_lightSrc.activate();
     shdr_lightSrc.setVec3f("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
-
 
     // Initialize transforms
     glm::mat4 model = glm::scale(glm::mat4(1.0f), glm::vec3(0.2f));
@@ -176,6 +177,9 @@ int main() {
     double lastTime=0;
     uint d=0;
     std::pair cpos=util::getCursorPos();// for dynamic terminal output
+    Mesh mesh(RESOURCE_DIR"/models/stanford_dragon/dragon.obj");
+    glm::mat4 model1(1.0f);
+    model1 = glm::rotate(model1, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     while (!glfwWindowShouldClose(window)) {
         // Setup
         double currTime = glfwGetTime();
@@ -261,14 +265,27 @@ int main() {
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
+        /*
         // Draw cube
         shdr_cube.activate();
         // Send MVP matrix to shader pipeline
-        shdr_cube.setMat4f("model", model);
+        glm::mat4 model1({
+            { 0.5f, 0.0f, 0.0f, 0.0f },
+            { 0.0f, 0.5f, 0.0f, 0.0f },
+            { 0.0f, 0.0f, 0.5f, 0.0f },
+            { 0.0f, 0.0f, 0.0f, 1.0f },
+        });
+        shdr_cube.setMat4f("model", model1);
         shdr_cube.setMat4f("view", view);
         shdr_cube.setMat4f("proj", proj);
-        glBindVertexArray(VAO);
+        glBindVertexArray(aiVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
+        */
+        shdr_cube.activate();
+        shdr_cube.setMat4f("model", model1);
+        shdr_cube.setMat4f("view", view);
+        shdr_cube.setMat4f("proj", proj);
+        mesh.draw();
 
         // Print dynamic info
         accDelta += deltaTime;
@@ -278,12 +295,6 @@ int main() {
             std::cout << "Frame Rate: " << (int)(d/accDelta) << "\n";
             std::cout << "currTime: " << currTime << "\n";
             std::cout << "cursor: (" << c_xpos << ", " << c_ypos << ")\n";
-            static const glm::vec4 f = camera.getView()*glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-            std::cout << "Camera_Coord: X1 Y1 Z1 ->" <<
-                " X" << f.x <<
-                " Y" << f.y <<
-                " Z" << f.z << "\n";
-            std::cout << camera.getView() << "\n";
             std::cout << "camera.getPos():" <<
                 " X" << camera.getPos().x <<
                 " Y" << camera.getPos().y <<
@@ -296,6 +307,10 @@ int main() {
                 " X" << camera.getDirection().x <<
                 " Y" << camera.getDirection().y <<
                 " Z" << camera.getDirection().z << "\n";
+            std::cout << "Model Matrix (Light):" << model << "\n";
+            std::cout << "Model Matrix (Object):" << model1 << "\n";
+            std::cout << "View Matrix:" << camera.getView() << "\n";
+            std::cout << "Projection Matrix:" << camera.getProj() << "\n";
             std::cout.flush();
             accDelta=0;
             d=0;

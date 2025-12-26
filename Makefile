@@ -18,7 +18,7 @@ RESOURCES := $(addprefix $(RESDEST)/,$(shell realpath --relative-to=$(RESDIR) $(
 SUBMAKE := $(shell dirname $(shell find . -name "submake.mk") 2>/dev/null || true)
 ##### Flags: #############
 CXXFLAGS +=
-LDFLAGS += -lm -lGL -lGLEW -lglfw -lglm
+LDFLAGS += -lm -lGL -lGLEW -lglfw -lglm -lassimp
 ##########################
 
 # STYLE:
