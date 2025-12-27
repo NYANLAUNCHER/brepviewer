@@ -157,14 +157,14 @@ int main() {
     glEnableVertexAttribArray(2);
 
     // Create shader programs
-    auto shdr_cube = Shader(SHADER_DIR"/lighting", "object");
+    auto shdr_mesh = Shader(SHADER_DIR"/lighting", "object");
     auto shdr_lightSrc = Shader(SHADER_DIR"/lighting", "source");
     // Initialize uniforms
     shdr_lightSrc.activate();
     shdr_lightSrc.setVec3f("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
 
     // Initialize transforms
-    glm::mat4 model = glm::scale(glm::mat4(1.0f), glm::vec3(0.2f));
+    glm::mat4 light_modelMat = glm::scale(glm::mat4(1.0f), glm::vec3(0.2f));
     glm::mat4 view = glm::mat4(1.0f);
     glm::mat4 proj = glm::mat4(1.0f);
     // Create Camera
@@ -177,9 +177,9 @@ int main() {
     double lastTime=0;
     uint d=0;
     std::pair cpos=util::getCursorPos();// for dynamic terminal output
-    Mesh mesh(RESOURCE_DIR"/models/stanford_dragon/dragon.obj");
-    glm::mat4 model1(1.0f);
-    model1 = glm::rotate(model1, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    Mesh mesh1(RESOURCE_DIR"/models/stanford_dragon/dragon.obj");
+    glm::mat4 mesh_modelMat(1.0f);
+    mesh_modelMat = glm::rotate(mesh_modelMat, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     while (!glfwWindowShouldClose(window)) {
         // Setup
         double currTime = glfwGetTime();
@@ -259,33 +259,18 @@ int main() {
         // Draw light source
         shdr_lightSrc.activate();
         // Send MVP matrix to shader pipeline
-        shdr_lightSrc.setMat4f("model", model);
+        shdr_lightSrc.setMat4f("model", light_modelMat);
         shdr_lightSrc.setMat4f("view", view);
         shdr_lightSrc.setMat4f("proj", proj);
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
-        /*
-        // Draw cube
-        shdr_cube.activate();
-        // Send MVP matrix to shader pipeline
-        glm::mat4 model1({
-            { 0.5f, 0.0f, 0.0f, 0.0f },
-            { 0.0f, 0.5f, 0.0f, 0.0f },
-            { 0.0f, 0.0f, 0.5f, 0.0f },
-            { 0.0f, 0.0f, 0.0f, 1.0f },
-        });
-        shdr_cube.setMat4f("model", model1);
-        shdr_cube.setMat4f("view", view);
-        shdr_cube.setMat4f("proj", proj);
-        glBindVertexArray(aiVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        */
-        shdr_cube.activate();
-        shdr_cube.setMat4f("model", model1);
-        shdr_cube.setMat4f("view", view);
-        shdr_cube.setMat4f("proj", proj);
-        mesh.draw();
+        // Draw Dragon
+        shdr_mesh.activate();
+        shdr_mesh.setMat4f("model", mesh_modelMat);
+        shdr_mesh.setMat4f("view", view);
+        shdr_mesh.setMat4f("proj", proj);
+        mesh1.draw();
 
         // Print dynamic info
         accDelta += deltaTime;
@@ -307,8 +292,8 @@ int main() {
                 " X" << camera.getDirection().x <<
                 " Y" << camera.getDirection().y <<
                 " Z" << camera.getDirection().z << "\n";
-            std::cout << "Model Matrix (Light):" << model << "\n";
-            std::cout << "Model Matrix (Object):" << model1 << "\n";
+            std::cout << "Model Matrix (Light):" << light_modelMat << "\n";
+            std::cout << "Model Matrix (Mesh):" << mesh_modelMat << "\n";
             std::cout << "View Matrix:" << camera.getView() << "\n";
             std::cout << "Projection Matrix:" << camera.getProj() << "\n";
             std::cout.flush();

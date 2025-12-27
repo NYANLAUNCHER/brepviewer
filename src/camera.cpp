@@ -21,7 +21,7 @@ glm::mat4 Camera::getProj() {
 /*  Camera Controls:  */
 
 void Camera::look(glm::vec3 direction) {
-    util::coord::Spherical s=util::coord::toSpherical(direction);
+    util::coord::Spherical s(direction);
     m_direction=glm::normalize(direction);
 }
 
