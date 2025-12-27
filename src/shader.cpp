@@ -6,6 +6,9 @@
 #include <unordered_map>
 #include <glm/gtc/type_ptr.hpp>
 
+//Shader::Shader(const char* vert_src, const char* frag_src) {
+//}
+
 Shader::Shader(std::string base_path, std::string base_name) {
     if (base_path.back() != '/') 
         base_path = base_path + "/";
@@ -56,10 +59,6 @@ Shader::Shader(std::string base_path, std::string base_name) {
     checkCompileErrors(m_ID, "PROGRAM");
     glDeleteShader(vertID);
     glDeleteShader(fragID);
-    // Init special uniforms
-    this->model=glm::mat4(1.0f);
-    this->view=glm::mat4(1.0f);
-    this->proj=glm::mat4(1.0f);
 }
 
 void Shader::checkCompileErrors(unsigned int shader_id, std::string type) {

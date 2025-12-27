@@ -23,9 +23,9 @@ public:
     // Constructor ty shi'
     Camera();
     
-    inline glm::vec3 getDirection() const {return glm::normalize(m_direction);}
-    inline glm::vec3 getUp() const {return glm::normalize(m_up);}
-    inline glm::vec3 getRight() const {return glm::normalize(m_right);}
+    inline glm::vec3 getDirection() const {return m_direction;}
+    inline glm::vec3 getUp() const {return m_up;}
+    inline glm::vec3 getRight() const {return m_right;}
     inline glm::vec3 getPos() const {return m_position;}
     
     // Recalculate m_view before returning it

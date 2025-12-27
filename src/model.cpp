@@ -1,5 +1,6 @@
 #include "model.hpp"
 #include "util.hpp"
+#include "shader.hpp"
 #include <iostream>
 #include <string>
 // Assimp

@@ -53,14 +53,16 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, gWINDOW_WIDTH, gWINDOW_HEIGHT);
 }
 
-void window_maximized_callback(GLFWwindow* window, int maximzied) {//{{{
+void window_maximized_callback(GLFWwindow* window, int maximzied) {
     // Hides title bar when maximzied
     if (maximzied) {
         glfwSetWindowAttrib(window, GLFW_DECORATED, GLFW_FALSE);
     } else {
         glfwSetWindowAttrib(window, GLFW_DECORATED, GLFW_TRUE);
     }
-}//}}}
+}
+
+void drawGrid(glm::vec2 top_left, glm::vec2 bottom_right, float z_height);
 
 int main() {
     // Window & Context Setup: {{{
@@ -81,6 +83,7 @@ int main() {
     std::cout << CURSOR_HOME << CLR_AFTER;
     std::cout.flush();
     //}}}
+    glfwSwapInterval(0);
 
     // GLFW Callbacks
     glfwSetKeyCallback(window, key_callback);
@@ -271,6 +274,9 @@ int main() {
         shdr_mesh.setMat4f("view", view);
         shdr_mesh.setMat4f("proj", proj);
         mesh1.draw();
+        
+        // Draw a grid object
+        //drawGrid({0.0f, 0.0f}, {20.0f, 20.0f}, 0.0f);
 
         // Print dynamic info
         accDelta += deltaTime;
@@ -312,3 +318,94 @@ int main() {
     return 0;
 }
 
+void drawGrid(glm::vec2 bottom_left, glm::vec2 top_right, float z_height) {
+    auto& tr=top_right;
+    auto& bl=bottom_left;
+    glm::vec2 tl={bl.x, tr.y};
+    glm::vec2 br={tr.x, bl.y};
+    static float verts[20] = {
+    //  position           grid coords
+        tl.x, tl.y, z_height, -1.0f, 1.0f, // top left (0)
+        tr.x, tr.y, z_height,  1.0f, 1.0f, // top right (1)
+        bl.x, bl.y, z_height, -1.0f,-1.0f, // btm left (2)
+        br.x, br.y, z_height,  1.0f,-1.0f  // btm right (3)
+    };
+    static const uint indices[6] = {
+        0, 1, 2, // Top left triangle
+        1, 3, 2  // Bottom right triangle
+    };
+    static const char* vert_src = R"(
+    #version 330
+    layout(location = 0) in vec3 aPos;
+    layout(location = 1) in vec2 aCoord;
+    out vec2 vCoord;
+    uniform mat4 model;
+    uniform mat4 view;
+    uniform mat4 proj;
+    void main() {
+      vCoord = aCoord;
+      gl_Position = proj * view * model * vec4(aPos, 1.0f);
+    }
+    )";
+    static const char* frag_src = R"(
+    #version 330
+    in vec2 vCoord;
+    out vec4 FragColor;
+    void main() {
+      FragColor = vec4(vCoord, 0.0f, 1.0f);
+    }
+    )";
+    static uint VBO, EBO, VAO;
+    static uint shdr_prog = glCreateProgram();
+    static bool ran=false;
+    if (!ran) {// initialize once
+        ran=true;
+        glGenVertexArrays(1, &VAO);
+        glGenBuffers(1, &VBO);
+        glGenBuffers(1, &EBO);
+        // Setup VBO
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
+        // Setup EBO
+        glBindBuffer(GL_ARRAY_BUFFER, EBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+        // Configure VAO
+        glBindBuffer(GL_ARRAY_BUFFER, VAO);
+        // aPos (location = 0)
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(
+            0,
+            3,
+            GL_FLOAT,
+            GL_FALSE,
+            sizeof(verts),
+            (void*)0
+        );
+        // aCoord (location = 1)
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(
+            1,
+            2,
+            GL_FLOAT,
+            GL_FALSE,
+            sizeof(verts),
+            (void*)3
+        );
+        uint vertID = glCreateShader(GL_VERTEX_SHADER);
+        glShaderSource(vertID, 1, &vert_src, NULL);
+        glCompileShader(vertID);
+        Shader::checkCompileErrors(vertID, "VERTEX");
+        uint fragID = glCreateShader(GL_FRAGMENT_SHADER);
+        glShaderSource(fragID, 1, &frag_src, NULL);
+        glCompileShader(fragID);
+        Shader::checkCompileErrors(fragID, "FRAGMENT");
+        glAttachShader(shdr_prog, vertID);
+        glAttachShader(shdr_prog, fragID);
+        glLinkProgram(shdr_prog);
+        Shader::checkCompileErrors(shdr_prog, "PROGRAM");
+        glDeleteShader(vertID);
+        glDeleteShader(fragID);
+    } 
+    glUseProgram(shdr_prog);
+    glDrawArrays(GL_TRIANGLES, 0, 4);
+}

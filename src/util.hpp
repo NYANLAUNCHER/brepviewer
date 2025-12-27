@@ -74,9 +74,15 @@ namespace util::coord {
         double r=0;
         double theta=0;
         double phi=0;
-        // the nothing constructor
+        // 
         Spherical();
         Spherical(double r, double theta, double phi): r(r), theta(theta), phi(phi) {}
+        // Cartesian to spherical coords
+        inline Spherical(glm::vec3 cartesian) {
+            r=sqrt(pow(cartesian.x, 2)+pow(cartesian.y, 2)+pow(cartesian.z, 2));
+            theta=acos(cartesian.z/r);
+            phi=atan2(cartesian.y, cartesian.x);
+        }
         inline glm::vec3 toCartesian() {
             return glm::vec3(
                 r*(sin(phi)*cos(theta)),
@@ -85,14 +91,4 @@ namespace util::coord {
             );
         };
     };
-    // Cartesian to spherical coords
-    inline Spherical toSpherical(glm::vec3 cartesian) {
-        auto& cart=cartesian;// I aint spellin allat
-        double r=sqrt((pow(cart.x, 2), pow(cart.y, 2), pow(cart.z, 2)));
-        return Spherical( // r, theta, phi
-            r,
-            acos(cart.z/r),
-            atan2(cart.y, cart.x)
-        );
-    }
 }

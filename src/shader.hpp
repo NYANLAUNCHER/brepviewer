@@ -8,14 +8,12 @@ class Shader {
 private:
     GLint m_ID;
     std::unordered_map<std::string, GLint> m_knownUniforms;
-    void checkCompileErrors(unsigned int shader_id, std::string type);
 public:
-    // special uniforms
-    glm::mat4 model;// -> world space
-    glm::mat4 view;// -> view/camera space
-    glm::mat4 proj;// -> clip space
+    // Standalone utility function for checking shader compile errors
+    static void checkCompileErrors(unsigned int shader_id, std::string type);
     ///@param base_name The name of the shader without file extention
     Shader(std::string base_path, std::string base_name);
+    //Shader(const char* vert_src, const char* frag_src);
     void activate() const;
     inline GLint getID() const {return m_ID;}
     // update uniforms

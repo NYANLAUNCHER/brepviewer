@@ -21,12 +21,13 @@ glm::mat4 Camera::getProj() {
 /*  Camera Controls:  */
 
 void Camera::look(glm::vec3 direction) {
-    util::coord::Spherical s(direction);
-    m_direction=glm::normalize(direction);
+    //util::coord::Spherical s(direction);
+    //m_up = s.toCartesian();
+    m_direction = glm::normalize(direction);
 }
 
 void Camera::lookAt(glm::vec3 direction) {
-    look(glm::normalize(getPos()+direction));
+    look(glm::normalize(getPos()-direction));
 }
 
 void Camera::moveTo(glm::vec3 position) {
