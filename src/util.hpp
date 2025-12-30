@@ -79,9 +79,12 @@ namespace util::coord {
         Spherical(double r, double theta, double phi): r(r), theta(theta), phi(phi) {}
         // Cartesian to spherical coords
         inline Spherical(glm::vec3 cartesian) {
-            r=sqrt(pow(cartesian.x, 2)+pow(cartesian.y, 2)+pow(cartesian.z, 2));
-            theta=acos(cartesian.z/r);
-            phi=atan2(cartesian.y, cartesian.x);
+            float& x=cartesian.x;
+            float& y=cartesian.y;
+            float& z=cartesian.z;
+            r=sqrt(pow(x,2) + pow(y,2) + pow(z,2));
+            theta=atan2(z, sqrt( pow(x,2) + pow(y,2) ));
+            phi=atan2(y,x);
         }
         inline glm::vec3 toCartesian() {
             return glm::vec3(

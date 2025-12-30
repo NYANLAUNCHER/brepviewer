@@ -26,10 +26,6 @@ void Camera::look(glm::vec3 direction) {
     m_direction = glm::normalize(direction);
 }
 
-void Camera::lookAt(glm::vec3 direction) {
-    look(glm::normalize(getPos()-direction));
-}
-
 void Camera::moveTo(glm::vec3 position) {
     m_position=position;
 }

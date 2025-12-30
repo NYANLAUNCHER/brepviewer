@@ -18,8 +18,9 @@
 #include "texture.hpp"
 #include "camera.hpp"
 #include "model.hpp"
-#define FOV_INIT 45.0f
 typedef unsigned int uint;
+// Default fov in degrees
+static const double DEFAULT_FOV=45.0f;
 
 static uint gWINDOW_WIDTH=1600;
 static uint gWINDOW_HEIGHT=1200;
@@ -175,14 +176,16 @@ int main() {
     camera.moveTo({0.0f, 5.0f, 0.0f});
     camera.lookAt({0.0f, 0.0f, 0.0f});
 
-    double deltaTime=0;
-    double accDelta=0;// accumulated delta for average frame rate
-    double lastTime=0;
-    uint d=0;
-    std::pair cpos=util::getCursorPos();// for dynamic terminal output
+    // Mesh data
     Mesh mesh1(RESOURCE_DIR"/models/stanford_dragon/dragon.obj");
     glm::mat4 mesh_modelMat(1.0f);
     mesh_modelMat = glm::rotate(mesh_modelMat, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+    double deltaTime=0;
+    double accDelta=0;// accumulated delta for average frame rate
+    double lastTime=0;
+    uint d=0;// count frames for dynamic terminal output
+    //std::pair cpos=util::getCursorPos();// for dynamic terminal output
     while (!glfwWindowShouldClose(window)) {
         // Setup
         double currTime = glfwGetTime();
@@ -214,7 +217,8 @@ int main() {
               sin(glm::radians(pitch))
             });
         }
-        static float fov=FOV_INIT;
+        // calculate fov in degrees before passing to camera
+        static float fov=DEFAULT_FOV;
         switch ((int)gScrollY) {
         case 1:
             fov -= 2.0f;
@@ -226,7 +230,7 @@ int main() {
             break;
         }
         if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_3) == GLFW_PRESS)
-            fov=FOV_INIT;
+            fov=DEFAULT_FOV;
         if (fov > 120.0f)
             fov=120.0f;
         if (fov < 10.0f)
@@ -281,7 +285,8 @@ int main() {
         // Print dynamic info
         accDelta += deltaTime;
         if (d >= 12) {// only print every 12 frames
-            std::cout << CURSOR_POS(cpos.first, cpos.second) << CLR_AFTER;
+            //std::cout << CURSOR_POS(cpos.first, cpos.second) << CLR_AFTER;
+            std::cout << CURSOR_HOME << CLR_AFTER;
             std::cout << "Delta Time: " << accDelta/d << "\n";
             std::cout << "Frame Rate: " << (int)(d/accDelta) << "\n";
             std::cout << "currTime: " << currTime << "\n";
@@ -298,6 +303,10 @@ int main() {
                 " X" << camera.getDirection().x <<
                 " Y" << camera.getDirection().y <<
                 " Z" << camera.getDirection().z << "\n";
+            std::cout << "camera.getRight():" <<
+                " X" << camera.getRight().x <<
+                " Y" << camera.getRight().y <<
+                " Z" << camera.getRight().z << "\n";
             std::cout << "Model Matrix (Light):" << light_modelMat << "\n";
             std::cout << "Model Matrix (Mesh):" << mesh_modelMat << "\n";
             std::cout << "View Matrix:" << camera.getView() << "\n";

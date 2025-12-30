@@ -48,7 +48,9 @@ public:
     // The direction in which to point the camera
     void look(glm::vec3 direction);
     // Point the camera at a coordinate in world space
-    void lookAt(glm::vec3 direction);
+    inline void lookAt(glm::vec3 direction) {
+        look(glm::normalize(getPos()-direction));
+    }
     // Move along m_direction vector by distance
     void forward(float distance);
     // Move along m_right vector by distance
