@@ -174,19 +174,24 @@ int main() {
     glm::mat4 proj = glm::mat4(1.0f);
     // Create Camera
     Camera camera;
-    camera.moveTo({0.0f, 5.0f, 0.0f});
+    camera.moveTo({0.0f, 10.0f, 5.0f});
 
     double deltaTime=0;
     double accDelta=0;// accumulated delta for average frame rate
     double lastTime=0;
     uint d=0;// count frames for dynamic terminal output
+    Mesh mesh_dragon(RESOURCE_DIR"/models/stanford_dragon/dragon.obj");
+    glm::mat4 mesh_modelMat(1.0f);
+    mesh_modelMat = glm::rotate(mesh_modelMat, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     //std::string h;std::cin >> h;// pause for stupid errors
     while (!glfwWindowShouldClose(window)) {
         // Setup
         double currTime = glfwGetTime();
         deltaTime = currTime - lastTime;
-        float light_x = cos(currTime*.25)*6;
-        float light_y = sin(currTime*.25)*6;
+        const float orbit=30.0f;
+        float light_x = cos(currTime*.25)*orbit;
+        float light_y = sin(currTime*.25)*orbit;
+        float light_z = 10+sin(currTime*.25)*orbit;
         glEnable(GL_DEPTH_TEST);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(0.2f, 0.4f, 0.3f, 1.0f);
@@ -266,7 +271,7 @@ int main() {
         // Draw light source
         shdr_lightSrc.activate();
         // Send MVP matrix to shader pipeline
-        glm::vec3 light_pos(light_x, light_y, 0.0f);
+        glm::vec3 light_pos(light_x, light_y, light_z);
         light_modelMat = glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(0.2f)), light_pos);
         shdr_lightSrc.setMat4f("model", light_modelMat);
         shdr_lightSrc.setMat4f("view", view);
@@ -277,12 +282,13 @@ int main() {
         // Draw Cube
         shdr_mesh.activate();
         // Send MVP matrix to shader pipeline
-        shdr_mesh.setMat4fv("model", glm::mat4(1.0f));
+        shdr_mesh.setMat4f("model", mesh_modelMat);
         shdr_mesh.setMat4f("view", view);
         shdr_mesh.setMat4f("proj", proj);
         shdr_mesh.setVec3f("lightPos", light_pos);
-        glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        mesh_dragon.draw();
+        //glBindVertexArray(VAO);
+        //glDrawArrays(GL_TRIANGLES, 0, 36);
         
         // Draw a grid object
         //drawGrid({0.0f, 0.0f}, {20.0f, 20.0f}, 0.0f);

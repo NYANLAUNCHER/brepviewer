@@ -61,7 +61,7 @@ void Mesh::draw() {
     glDrawArrays(GL_TRIANGLES, 0, verts.size());
 }
 
-Mesh::Mesh(const std::string& pFile) {
+Mesh::Mesh(const std::string& file_path) {
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
@@ -70,14 +70,12 @@ Mesh::Mesh(const std::string& pFile) {
     // Usually - if speed is not the most important aspect for you - you'll
     // probably to request more postprocessing than we do in this example.
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(pFile,
+    const aiScene* scene = importer.ReadFile(file_path,
         aiProcess_Triangulate           |
         aiProcess_GenNormals            |
-        aiProcess_JoinIdenticalVertices// |
-        //aiProcess_CalcTangentSpace      |
-        //aiProcess_SortByPType
+        aiProcess_JoinIdenticalVertices
     );
-    if (nullptr == scene) {
+    if (scene == nullptr) {
       std::cout << RED("ERROR: ") << importer.GetErrorString() << std::endl;
     }
     if (!scene || !scene->HasMeshes()) {
