@@ -22,6 +22,8 @@ public:
     void setBool(std::string name, bool value);
     void setInt(std::string name, int value);
     void setFloat(std::string name, float value);
-    void setVec3f(std::string name, glm::vec3 value);
+    void setVec3f(std::string name, glm::vec3& value);
+    void setVec3fv(std::string name, glm::vec3 value);
     void setMat4f(std::string name, glm::mat4& value);
+    void setMat4fv(std::string name, glm::mat4 value);
 };

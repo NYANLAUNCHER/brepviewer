@@ -36,9 +36,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
             glfwSetWindowShouldClose(window, true);
         break;
     case GLFW_KEY_ESCAPE:// Release the CURSOR!!!
-        if (action == GLFW_RELEASE) {
+        if (action == GLFW_RELEASE) 
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-        }
         break;
     }
 }
@@ -165,31 +164,29 @@ int main() {
     auto shdr_lightSrc = Shader(SHADER_DIR"/lighting", "source");
     // Initialize uniforms
     shdr_lightSrc.activate();
-    shdr_lightSrc.setVec3f("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+    shdr_lightSrc.setVec3fv("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+    shdr_mesh.activate();
+    shdr_mesh.setVec3fv("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
 
     // Initialize transforms
-    glm::mat4 light_modelMat = glm::scale(glm::mat4(1.0f), glm::vec3(0.2f));
+    glm::mat4 light_modelMat = glm::mat4(1.0f);
     glm::mat4 view = glm::mat4(1.0f);
     glm::mat4 proj = glm::mat4(1.0f);
     // Create Camera
     Camera camera;
     camera.moveTo({0.0f, 5.0f, 0.0f});
-    camera.lookAt({0.0f, 0.0f, 0.0f});
-
-    // Mesh data
-    Mesh mesh1(RESOURCE_DIR"/models/stanford_dragon/dragon.obj");
-    glm::mat4 mesh_modelMat(1.0f);
-    mesh_modelMat = glm::rotate(mesh_modelMat, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
     double deltaTime=0;
     double accDelta=0;// accumulated delta for average frame rate
     double lastTime=0;
     uint d=0;// count frames for dynamic terminal output
-    //std::pair cpos=util::getCursorPos();// for dynamic terminal output
+    //std::string h;std::cin >> h;// pause for stupid errors
     while (!glfwWindowShouldClose(window)) {
         // Setup
         double currTime = glfwGetTime();
         deltaTime = currTime - lastTime;
+        float light_x = cos(currTime*.25)*6;
+        float light_y = sin(currTime*.25)*6;
         glEnable(GL_DEPTH_TEST);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(0.2f, 0.4f, 0.3f, 1.0f);
@@ -197,10 +194,13 @@ int main() {
         static double c_xpos=gWINDOW_CENTER_X, c_ypos=gWINDOW_CENTER_Y;
         static float pitch=0.0f, yaw=0.0f;
         if (glfwGetWindowAttrib(window, GLFW_FOCUSED)) {
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS)
+                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
             float lastX = c_xpos;
             float lastY = c_ypos;
-            glfwGetCursorPos(window, &c_xpos, &c_ypos);
+            if (glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED) {
+                glfwGetCursorPos(window, &c_xpos, &c_ypos);
+            }
             float xoff = c_xpos - lastX;
             float yoff = lastY - c_ypos; // reversed, since glfw's y-coordinates range from bottom to top
             const float sensitivity = 0.025f;
@@ -235,7 +235,7 @@ int main() {
             fov=120.0f;
         if (fov < 10.0f)
             fov=10.0f;
-        camera.m_fov=fov;
+        camera.m_fov=glm::radians(fov);
         //}}}
         // Handle Keyboard Events {{{
         float cameraSpeed = 3.0f * deltaTime; // adjust accordingly
@@ -266,18 +266,23 @@ int main() {
         // Draw light source
         shdr_lightSrc.activate();
         // Send MVP matrix to shader pipeline
+        glm::vec3 light_pos(light_x, light_y, 0.0f);
+        light_modelMat = glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(0.2f)), light_pos);
         shdr_lightSrc.setMat4f("model", light_modelMat);
         shdr_lightSrc.setMat4f("view", view);
         shdr_lightSrc.setMat4f("proj", proj);
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
-        // Draw Dragon
+        // Draw Cube
         shdr_mesh.activate();
-        shdr_mesh.setMat4f("model", mesh_modelMat);
+        // Send MVP matrix to shader pipeline
+        shdr_mesh.setMat4fv("model", glm::mat4(1.0f));
         shdr_mesh.setMat4f("view", view);
         shdr_mesh.setMat4f("proj", proj);
-        mesh1.draw();
+        shdr_mesh.setVec3f("lightPos", light_pos);
+        glBindVertexArray(VAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
         
         // Draw a grid object
         //drawGrid({0.0f, 0.0f}, {20.0f, 20.0f}, 0.0f);
@@ -285,7 +290,6 @@ int main() {
         // Print dynamic info
         accDelta += deltaTime;
         if (d >= 12) {// only print every 12 frames
-            //std::cout << CURSOR_POS(cpos.first, cpos.second) << CLR_AFTER;
             std::cout << CURSOR_HOME << CLR_AFTER;
             std::cout << "Delta Time: " << accDelta/d << "\n";
             std::cout << "Frame Rate: " << (int)(d/accDelta) << "\n";
@@ -308,7 +312,6 @@ int main() {
                 " Y" << camera.getRight().y <<
                 " Z" << camera.getRight().z << "\n";
             std::cout << "Model Matrix (Light):" << light_modelMat << "\n";
-            std::cout << "Model Matrix (Mesh):" << mesh_modelMat << "\n";
             std::cout << "View Matrix:" << camera.getView() << "\n";
             std::cout << "Projection Matrix:" << camera.getProj() << "\n";
             std::cout.flush();

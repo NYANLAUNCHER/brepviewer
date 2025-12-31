@@ -70,14 +70,22 @@ namespace util {
 };
 
 namespace util::coord {
+    // TODO:
+    // - use field polar to adjust calculations
     struct Spherical {
+        // Polar axis aligned with Z by default
+        glm::vec3 polar=glm::vec3(0.0f, 0.0f, 1.0f);
+        // Radius/Magnitude
         double r=0;
+        // Azimuthal angle (Angle from polar axis)
         double theta=0;
+        // Polar angle (Angle around polar axis)
         double phi=0;
-        // 
         Spherical();
-        Spherical(double r, double theta, double phi): r(r), theta(theta), phi(phi) {}
+        Spherical(double r, double theta, double phi):
+            r(r), theta(theta), phi(phi) {}
         // Cartesian to spherical coords
+        // see: https://www.math3d.org/x6dcWlCwL5
         inline Spherical(glm::vec3 cartesian) {
             float& x=cartesian.x;
             float& y=cartesian.y;
@@ -86,12 +94,18 @@ namespace util::coord {
             theta=atan2(z, sqrt( pow(x,2) + pow(y,2) ));
             phi=atan2(y,x);
         }
-        inline glm::vec3 toCartesian() {
+        static inline glm::vec3 toCartesian(Spherical& s) {
+            double& r = s.r;
+            double& phi = s.phi;
+            double& theta = s.theta;
             return glm::vec3(
                 r*(sin(phi)*cos(theta)),
                 r*(sin(phi)*sin(theta)),
                 r*cos(phi)
             );
-        };
+        }
+        inline glm::vec3 toCartesian() {
+            return toCartesian(*this);
+        }
     };
 }

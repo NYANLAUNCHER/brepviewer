@@ -20,9 +20,11 @@ glm::mat4 Camera::getProj() {
 
 /*  Camera Controls:  */
 
+// see: https://www.math3d.org/x6dcWlCwL5
 void Camera::look(glm::vec3 direction) {
-    //util::coord::Spherical s(direction);
-    //m_up = s.toCartesian();
+    //using util::coord::Spherical;
+    //Spherical s(direction);
+    //m_up = Spherical(s.r, s.theta, s.phi).toCartesian();
     m_direction = glm::normalize(direction);
 }
 
