@@ -183,12 +183,12 @@ int main() {
     Mesh mesh_dragon(RESOURCE_DIR"/models/stanford_dragon/dragon.obj");
     glm::mat4 mesh_modelMat(1.0f);
     mesh_modelMat = glm::rotate(mesh_modelMat, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    //std::string h;std::cin >> h;// pause for stupid errors
+    std::cin.get();// pause for stupid errors
     while (!glfwWindowShouldClose(window)) {
         // Setup
         double currTime = glfwGetTime();
         deltaTime = currTime - lastTime;
-        const float orbit=30.0f;
+        const float orbit=5.0f;
         float light_x = cos(currTime*.25)*orbit;
         float light_y = sin(currTime*.25)*orbit;
         float light_z = 10+sin(currTime*.25)*orbit;
@@ -286,9 +286,10 @@ int main() {
         shdr_mesh.setMat4f("view", view);
         shdr_mesh.setMat4f("proj", proj);
         shdr_mesh.setVec3f("lightPos", light_pos);
-        mesh_dragon.draw();
-        //glBindVertexArray(VAO);
-        //glDrawArrays(GL_TRIANGLES, 0, 36);
+        shdr_mesh.setVec3fv("viewPos", camera.getPos());
+        //mesh_dragon.draw();
+        glBindVertexArray(VAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
         
         // Draw a grid object
         //drawGrid({0.0f, 0.0f}, {20.0f, 20.0f}, 0.0f);

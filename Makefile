@@ -33,9 +33,7 @@ LDFLAGS += -lm -lGL -lGLEW -lglfw -lglm -lassimp
 #### User-Invoked Rules: ####
 .DEFAULT_GOAL :=
 .PHONY: build
-build: $(SUBMAKE) # $(SUBMAKE) is always the first target to run
-	@$(MAKE) -i .ccls
-	@$(MAKE) -i $(RESOURCES)
+build: $(SUBMAKE) .ccls
 	@$(MAKE) $(TARGET)
 
 develop: .dev-profile
@@ -80,7 +78,7 @@ $(SUBMAKE):
 	@echo -e '\033[0;32mRunning submake: \033[0;34m./$(shell realpath --relative-to=./ $@)/\033[0m'
 	@$(MAKE) -C $@ -f submake.mk
 
-$(TARGET): $(CXXOBJS)
+$(TARGET): $(CXXOBJS) $(RESOURCES)
 	@echo -e '\033[0;32mBuilding target: \033[0;34m$(addprefix ./,$(shell realpath --relative-to=./ $@))\033[0m'
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(CXXOBJS) -o $@

@@ -7,5 +7,6 @@ export TOP := $(CURDIR)
 export build := $(TOP)/build
 export RESDEST := $(build)/share/$(pname)
 # default flags
+export MAKE := $(MAKE) --no-print-directory
 export CXXFLAGS = -std=c++20 -Wall
 export CXXFLAGS += -g -ggdb -DDEBUG

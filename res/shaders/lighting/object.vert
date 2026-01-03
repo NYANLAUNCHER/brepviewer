@@ -11,6 +11,7 @@ uniform mat4 proj;
 
 void main() {
   gl_Position = proj * view * model * vec4(aPos, 1.0);
-  FragPos = vec3(model * vec4(aPos, 1.0));
   Normal = aNormal;
+  // fragment position in world space
+  FragPos = vec3(model * vec4(aPos, 1.0));
 }

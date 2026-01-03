@@ -42,6 +42,11 @@ inline std::string CURSOR_POS(int line, int column) {
   return ESC"[" + std::to_string(line) + ";" + std::to_string(column) + "H";
 }
 
+template <typename T>
+int sgn(T val) {
+    return (T(0) < val) - (val < T(0));
+}
+
 #include <glm/glm.hpp>
 namespace util {
     inline std::pair<int, int> getCursorPos() {
@@ -71,7 +76,8 @@ namespace util {
 
 namespace util::coord {
     // TODO:
-    // - use field polar to adjust calculations
+    // - make this work
+    // - use polar angle instead of hard-coded axis
     struct Spherical {
         // Polar axis aligned with Z by default
         glm::vec3 polar=glm::vec3(0.0f, 0.0f, 1.0f);
@@ -91,7 +97,7 @@ namespace util::coord {
             float& y=cartesian.y;
             float& z=cartesian.z;
             r=sqrt(pow(x,2) + pow(y,2) + pow(z,2));
-            theta=atan2(z, sqrt( pow(x,2) + pow(y,2) ));
+            theta=-atan2( z, sqrt(pow(x,2) + pow(y,2)) )*sgn(x);
             phi=atan2(y,x);
         }
         static inline glm::vec3 toCartesian(Spherical& s) {
