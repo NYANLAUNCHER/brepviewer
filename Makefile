@@ -50,6 +50,7 @@ debug: build
 clean:
 	@echo -e '\033[0;32mCleaning build artifacts\033[0m'
 	rm -rf $(build)/.* # build artifacts start with '.'
+	git clean -Xfd -n
 
 .PHONY: install
 install: # sync the $(build) and $(out) directories
