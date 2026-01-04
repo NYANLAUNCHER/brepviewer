@@ -36,9 +36,6 @@ LDFLAGS += -lm -lGL -lGLEW -lglfw -lglm -lassimp
 build: $(SUBMAKE) .ccls
 	@$(MAKE) $(TARGET)
 
-develop: .dev-profile
-	. $(realpath $<)
-
 .PHONY: run
 run: build
 	@echo -e '\n\033[0;34m$(TARGET)\033[0m'
@@ -52,20 +49,17 @@ debug: build
 .PHONY: clean
 clean:
 	@echo -e '\033[0;32mCleaning build artifacts\033[0m'
-	rm -rf $(build)/* $(build)/.*
-	git clean -Xfd -n
+	rm -rf $(build)/.* # build artifacts start with '.'
 
 .PHONY: install
-install: # sync $(build) and $(out)
+install: # sync the $(build) and $(out) directories
 ifndef out
 	$(error Variable $$(out) must be defined for `make install`)
 endif
-	rsync -a --delete $(build)/ $(out)
+	rsync -a --delete $(build)/* $(out)
 
 #### Tools: ####
-.dev-profile: flake.nix flake.lock
-	nix print-dev-env > $@
-
+.PHONY: .ccls
 .ccls: 
 	@echo -e '\033[0;32mRunning rule: \033[0;34m$@\033[0m'
 	echo $(CXX) > .ccls

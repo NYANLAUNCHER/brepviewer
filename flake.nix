@@ -11,7 +11,7 @@
     pname = "brepviewer";
     version = "0.1.0";
     nativeBuildInputs = with pkgs; [ # build-time dependencies
-        pkg-config autoconf automake gcc
+      pkg-config autoconf automake gcc rsync
     ];
     buildInputs = with pkgs; [ # runtime dependencies
       libGL
@@ -19,6 +19,7 @@
       glew
       glfw
       glm
+      lua
       assimp
     ];
     ##########################################
@@ -35,13 +36,14 @@
     };
     devShells.${system}.default = pkgs.mkShell {
       inherit buildInputs;
-      nativeBuildInputs = with pkgs; [
-        #glxinfo
-        lldb
-        gdb
-        renderdoc
+      nativeBuildInputs = nativeBuildInputs ++ (with pkgs; [
+        # dev-shell utils
+        lldb gdb
         unixtools.xxd
-      ] ++ nativeBuildInputs;
+        renderdoc
+        mesa-demos
+        vdpauinfo
+      ]);
       shellHook = ''
         export pname=${pname}
         export out=""
