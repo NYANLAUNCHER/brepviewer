@@ -19,8 +19,8 @@ Shader::Shader(std::string base_path, std::string base_name) {
     std::ifstream vertFile;
     std::ifstream fragFile;
     // ensure ifstream objects can throw exceptions:
-    vertFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
-    fragFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
+    vertFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+    fragFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
     try {
         // open files
         vertFile.open(vertPath);
@@ -39,7 +39,7 @@ Shader::Shader(std::string base_path, std::string base_name) {
                      vertSrc << std::endl;
         std::cout << GREEN("Compiling fragment shader: ") << BLUE(fragPath) << "\n" <<
                      fragSrc << std::endl;
-    } catch (std::ifstream::failure& e) {
+    } catch (const std::ifstream::failure& e) {
         std::cout << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ: " << e.what() << std::endl;
     }
     const char* vertSrc_cstr = vertSrc.c_str();

@@ -7,6 +7,7 @@
   let
     system = "x86_64-linux";
     pkgs = import nixpkgs { inherit system; };
+
     ##########################################
     pname = "brepviewer";
     version = "0.1.0";
@@ -46,7 +47,6 @@
       ]);
       shellHook = ''
         export pname=${pname}
-        export out=""
       '';
     };
   };
