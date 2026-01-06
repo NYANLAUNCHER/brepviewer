@@ -11,23 +11,25 @@ CXXSRCS := $(shell find $(SRCDIR) -type f -name "*.cpp")
 DEPS := $(CXXSRCS:$(SRCDIR)/%.cpp=$(OBJDIR)/%.d)
 -include $(DEPS)
 ##### Targets: ###########
-TARGET := $(build)/bin/$(pname)
+TARGET := $(BINDEST)/$(pname)
 OBJDIR := $(build)/.obj_tree
 CXXOBJS := $(CXXSRCS:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
 RESOURCES := $(addprefix $(RESDEST)/,$(shell realpath --relative-to=$(RESDIR) $(shell find $(RESDIR) -type f)))
 SUBMAKE := $(shell dirname $(shell find . -name "submake.mk") 2>/dev/null || true)
 ##### Flags: #############
 CXXFLAGS +=
-LDFLAGS += -lm -lGL -lGLEW -lglfw -lglm -lassimp
+LDFLAGS += -lm -lGL -lGLEW -lglfw -lglm -lassimp -llua
 ##########################
 
 # STYLE:
 # - inputs use relative paths
 # - outputs use absolute paths
+# - suffix "DIR" for build inputs
+# - suffix "DEST" for build outputs
+# - dirs and files matching path $(build)/.* wont be copied/installed into $(out)
 # Manditory rules:
 # - `make build` build $(TARGET)
-# - `make run` build and execute $(TARGET)
-# - `make clean` clean all artifacts
+# - `make clean` clean all build artifacts
 # - `make install` sync $(out) with $(build)
 
 #### User-Invoked Rules: ####
@@ -38,7 +40,7 @@ build: $(SUBMAKE) .ccls
 
 .PHONY: run
 run: build
-	@echo -e '\n\033[0;34m$(TARGET)\033[0m'
+	@echo -e '\033[0;32mRunning Executable: \033[0;34m./$(shell realpath --relative-to="./" $(TARGET))\033[0m'
 	@$(TARGET)
 
 .PHONY: debug
@@ -47,16 +49,22 @@ debug: build
 	gdb $(TARGET)
 
 .PHONY: clean
-clean:
-	@echo -e '\033[0;32mCleaning build artifacts\033[0m'
+clean: # clean build artifacts
+	@echo -e '\033[0;32mCleaning build artifacts: \033[0m'
 	rm -rf $(build)/.* # build artifacts start with '.'
+
+.PHONY: clean-git
+clean-git: # clean untracked files
+	@echo -e '\033[0;32mCleaning untracked files: \033[0m'
 	git clean -Xfd -n
 
 .PHONY: install
-install: # sync the $(build) and $(out) directories
+install: build # sync the $(build) and $(out) directories
+	@echo -e '\033[0;32mInstalling $(pname): \033[0m'
 ifndef out
-	$(error Variable $$(out) must be defined for `make install`)
+	$(error Variable $$(out) must be defined for command `make install`)
 endif
+	mkdir -p $(out)
 	rsync -a --delete $(build)/* $(out)
 
 #### Tools: ####
