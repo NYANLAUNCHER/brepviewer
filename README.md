@@ -21,4 +21,4 @@ An incomplete BREP [Boundary REPresentation](https://en.wikipedia.org/wiki/Bound
 - **size**: size measured in some underlying type (i.e. int)
 - **stride**: size in bytes
 - **count**: current count of items in an array
-- **capacity**: the max amount of items an array can hold
+- **capacity**: the max amount of items an array can currently hold
