@@ -9,15 +9,15 @@ An incomplete BREP [Boundary REPresentation](https://en.wikipedia.org/wiki/Bound
 
 ## C++ Style Guide
 ### Naming Conventions
-- **Macros** use: *ALL_CAPS*
-- **Global Variables** use: *gALL_CAPS*
-- **Local Variables** use: *snake_case*
-- **Non-Member Functions** use: *PascalCase()* or *identifier_PascalCase()*
-- **Namespaces** use: *snake_case* (prefer single word or acronym, i.e. "brep"; abbreviate if necessary)
-- **Structs, Classes, & Enums** use: *PascalCase*
-- **Private & Protected Member Variables** use: *m_snake_case*
-- **Public Member Variables** use: *snake_case*
-- **Methods** use: *dromedaryCase()*
+- **Macros** use: **ALL_CAPS**
+- **Global Variables** use: **gALL_CAPS**
+- **Local Variables** use: **snake_case**
+- **Non-Member Functions** use: **PascalCase()** or **identifier_PascalCase()**
+- **Namespaces** use: **snake_case** (prefer single word or acronym, i.e. "brep"; abbreviate if necessary)
+- **Structs, Classes, & Enums** use: **PascalCase**
+- **Private & Protected Member Variables** use: **m_snake_case**
+- **Public Member Variables** use: **snake_case**
+- **Methods** use: **dromedaryCase()**
 - Notes:
   - Capitalize acronyms, i.e. brep -> BREP
 
