@@ -22,12 +22,12 @@ An incomplete BREP [Boundary REPresentation](https://en.wikipedia.org/wiki/Bound
   - Capitalize acronyms, i.e. brep -> BREP
 
 ### Glossary
-- **size**: current size in bytes
-- **capacity**: total capacity measured in bytes
-- **stride**: offset in bytes between consecutive elements
-- **offset**: generic memory offset measured in bytes
-- **count**: current count of items in an array
-- **length**: the number of (available) indices in an array
+- **size**: the size of an object in *bytes*
+- **capacity**: total capacity measured in *bytes*
+- **stride**: offset in *bytes* between consecutive elements
+- **offset**: generic memory offset measured in *bytes*
+- **count**: the number of *items* currently being stored
+- **length**: max amount of *items* that can be held by an object
 
 ### Preferred Abbreviations & Acronyms
 - *attribs* = *attributes*
