@@ -21,7 +21,7 @@
       glfw
       glm
       assimp
-      lua
+      lua54Packages.lua
     ];
     ##########################################
   in {
