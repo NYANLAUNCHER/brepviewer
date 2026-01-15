@@ -2,7 +2,7 @@
 
 Lua::Lua(std::string lua_dir, std::string lua_path) {
     L=luaL_newstate();
-    // load lua std library
+    // load lua std libr
     luaL_openlibs(L);
     // setup package search paths
     std::string lua_src =
