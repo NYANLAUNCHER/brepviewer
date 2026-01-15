@@ -47,6 +47,50 @@ int sgn(T val) {
     return (T(0) < val) - (val < T(0));
 }
 
+// Debug:
+template<typename... Args>
+void _fn_println(Args&&... args) {
+    (std::cout << ... << args) << std::endl;
+}
+#ifdef DEBUG
+// Optionally run a block of code if DEBUG is defined
+// Uses "do {} while()" syntax, so it should work in "single-line" if statements
+#define dbg(...) do {__VA_ARGS__} while(0)
+#define println(...) _fn_println(__VA_ARGS__)
+#else
+#define println(...)
+#define dbg(...)
+#endif
+// END Debug
+
+#ifdef NO_FILE_UTILS
+// NO_FILE_UTILS
+#else
+// File Utils
+#include <fstream>
+#include <sstream>
+void readfile(const std::string path, std::string& src) {
+    std::ifstream file;
+    std::stringstream ss;
+    file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+    try {
+        file.open(path);
+        file.seekg(0, std::ios::end);
+        src.resize(file.tellg());
+        file.seekg(0, std::ios::beg);
+        file.read(&src[0], src.size());
+    } catch (const std::ifstream::failure& e) {
+        std::cout << "Exception thrown: " << e.what() << std::endl;
+    }
+}
+// note: doesn't include trailing slash
+std::string getDirectory(const std::string& path) {
+    size_t pos = path.find_last_of("/\\");   // handle both slashes
+    if (pos == std::string::npos) return ""; // no directory
+    return path.substr(0, pos);          // include trailing slash
+}
+#endif// NO_FILE_UTILS
+
 #include <glm/glm.hpp>
 namespace util {
     inline std::pair<int, int> getCursorPos() {
